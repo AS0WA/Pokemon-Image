@@ -15,8 +15,6 @@ def pokemon_func(pokemon_name, graphic, shiny, who):
         img = Image.open('pokemon.png')
         resized_img = img.resize((500, 500))
         resized_img.save('pokemon.png')
-    else:
-        ditto()
 
 
 def pokemon_image_url(pokemon_name, graphic, shiny):
@@ -24,15 +22,15 @@ def pokemon_image_url(pokemon_name, graphic, shiny):
         pokeapi = requests.get(f"https://pokeapi.co/api/v2/pokemon/{pokemon_name.lower() and pokemon_name.replace(' ', '-')}")
         pokemon = pokeapi.json()
 
-        if graphic == 'Default' and shiny is True:
+        if graphic == 'Pixel Art' and shiny is True:
             url = pokemon['sprites']['front_shiny']
-        elif graphic == 'Artwork' and shiny is False:
+        elif graphic == 'Art Work' and shiny is False:
             url = pokemon['sprites'].get('other', pokemon['sprites']).get('official-artwork')['front_default']
-        elif graphic == 'Artwork' and shiny is True:
+        elif graphic == 'Art Work' and shiny is True:
             url = pokemon['sprites'].get('other', pokemon['sprites']).get('official-artwork')['front_shiny']
-        elif graphic == 'Home' and shiny is False:
+        elif graphic == '3D' and shiny is False:
             url = pokemon['sprites'].get('other', pokemon['sprites']).get('home')['front_default']
-        elif graphic == 'Home' and shiny is True:
+        elif graphic == '3D' and shiny is True:
             url = pokemon['sprites'].get('other', pokemon['sprites']).get('home')['front_shiny']
         else:
             url = pokemon['sprites']['front_default']
@@ -59,24 +57,12 @@ def pokemon_who(img):
     return img
 
 
-def ditto():
-    ditto_api = requests.get("https://pokeapi.co/api/v2/pokemon/ditto")
-    ditto = ditto_api.json()
-    ditto_url = ditto['sprites'].get('other', ditto['sprites']).get('official-artwork')['front_default']
-    ditto_img = Image.open(requests.get(ditto_url, stream=True).raw)
-    ditto_img = ditto_img.convert("RGBA")
-    ditto_img.save('ditto.png', 'PNG')
-    ditto_img = Image.open('ditto.png')
-    resized_img = ditto_img.resize((500, 500))
-    resized_img.save('ditto.png')
-
-
-layout = [[sg.Text('Enter Pokemon Name:'), sg.InputText(key="pokemon_name")],
-          [sg.Text('Graphics type:'), sg.Combo(['Default', 'Artwork', 'Home'], key='graphic'), sg.Text('Shiny:'),
+layout = [[sg.Text('Enter Pokemon Name:'), sg.InputText(key="pokemon name")],
+          [sg.Text('Graphics type:'), sg.Combo(['Pixel Art', 'Art Work', '3D'], key='graphic', default_value='Pixel Art'), sg.Text('Shiny:'),
            sg.Checkbox('', key='shiny')],
           [sg.Text("Who's that Pokemon:"), sg.Checkbox('coming soon', key='who')],
           [sg.Button('OK'), sg.Button('Save'), sg.Button('Cancel')],
-          [sg.Image(key="pokemon_img"), sg.Text('', key='ditto')]]
+          [sg.Image(key="pokemon img"), sg.Text('', key='Pokemon not found')]]
 
 window = sg.Window('Pokemon', layout, size=(550, 650))
 
@@ -87,19 +73,17 @@ while True:
     if event == 'OK':
         if os.path.exists('pokemon.png'):
             os.remove('pokemon.png')
-        pokemon_func(values['pokemon_name'], values['graphic'], values['shiny'], values['who'])
+        pokemon_func(values['pokemon name'], values['graphic'], values['shiny'], values['who'])
         if os.path.exists('pokemon.png'):
-            window['pokemon_img'].update(filename='pokemon.png')
+            window['pokemon img'].update(filename='pokemon.png')
         else:
-            window['pokemon_img'].update(filename='ditto.png')
+            window['Pokemon not found'].update('Pokemon not found')
 
     if event == 'Save' and os.path.exists('pokemon.png'):
-        file_path = sg.popup_get_file('Path', save_as=True, default_extension='.png')
+        desktop = os.path.join('c:\\Users', os.getlogin(), 'Desktop', f'{values["pokemon name"]}.png')
+        file_path = sg.popup_get_file('Path', save_as=True, default_path=desktop, default_extension='.png')
         pokemon = Image.open('pokemon.png')
-        pokemon.save(file_path)
-    elif event == 'Save' and os.path.exists('ditto.png'):
-        file_path = sg.popup_get_file('Path', save_as=True, default_extension='.png')
-        pokemon = Image.open('ditto.png')
-        pokemon.save(file_path)
+        if file_path is not None:
+            pokemon.save(file_path)
 
 window.close()
