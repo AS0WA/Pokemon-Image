@@ -15,11 +15,15 @@ def pokemon_func(pokemon_name, graphic, shiny, who):
         img = Image.open('pokemon.png')
         resized_img = img.resize((500, 500))
         resized_img.save('pokemon.png')
+    else:
+        if os.path.exists('pokemon.png'):
+            os.remove('pokemon.png')
 
 
 def pokemon_image_url(pokemon_name, graphic, shiny):
     try:
-        pokeapi = requests.get(f"https://pokeapi.co/api/v2/pokemon/{pokemon_name.lower() and pokemon_name.replace(' ', '-')}")
+        pokeapi = requests.get(
+            f"https://pokeapi.co/api/v2/pokemon/{pokemon_name.lower() and pokemon_name.replace(' ', '-')}")
         pokemon = pokeapi.json()
 
         if graphic == 'Pixel Art' and shiny is True:
@@ -58,7 +62,8 @@ def pokemon_who(img):
 
 
 layout = [[sg.Text('Enter Pokemon Name:'), sg.InputText(key="pokemon name")],
-          [sg.Text('Graphics type:'), sg.Combo(['Pixel Art', 'Art Work', '3D'], key='graphic', default_value='Pixel Art'), sg.Text('Shiny:'),
+          [sg.Text('Graphics type:'),
+           sg.Combo(['Pixel Art', 'Art Work', '3D'], key='graphic', default_value='Pixel Art'), sg.Text('Shiny:'),
            sg.Checkbox('', key='shiny')],
           [sg.Text("Who's that Pokemon:"), sg.Checkbox('coming soon', key='who')],
           [sg.Button('OK'), sg.Button('Save'), sg.Button('Cancel')],
@@ -76,8 +81,10 @@ while True:
         pokemon_func(values['pokemon name'], values['graphic'], values['shiny'], values['who'])
         if os.path.exists('pokemon.png'):
             window['pokemon img'].update(filename='pokemon.png')
+            window['Pokemon not found'].update('')
         else:
             window['Pokemon not found'].update('Pokemon not found')
+            window['pokemon img'].update()
 
     if event == 'Save' and os.path.exists('pokemon.png'):
         desktop = os.path.join('c:\\Users', os.getlogin(), 'Desktop', f'{values["pokemon name"]}.png')
