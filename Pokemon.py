@@ -15,9 +15,6 @@ def pokemon_func(pokemon_name, graphic, shiny, who):
         img = Image.open('pokemon.png')
         resized_img = img.resize((500, 500))
         resized_img.save('pokemon.png')
-    else:
-        if os.path.exists('pokemon.png'):
-            os.remove('pokemon.png')
 
 
 def pokemon_image_url(pokemon_name, graphic, shiny):
@@ -43,6 +40,8 @@ def pokemon_image_url(pokemon_name, graphic, shiny):
 
         return img
     except:
+        if os.path.exists('pokemon.png'):
+            os.remove('pokemon.png')
         return None
 
 
@@ -61,21 +60,22 @@ def pokemon_who(img):
     return img
 
 
-layout = [[sg.Text('Enter Pokemon Name:'), sg.InputText(key="pokemon name")],
+layout = [[sg.Text('Enter Pokemon Name or ID:'), sg.InputText(key="pokemon name")],
           [sg.Text('Graphics type:'),
-           sg.Combo(['Pixel Art', 'Art Work', '3D'], key='graphic', default_value='Pixel Art'), sg.Text('Shiny:'),
-           sg.Checkbox('', key='shiny')],
+           sg.Combo(['Pixel Art', 'Art Work', '3D'], key='graphic', default_value='Pixel Art'),
+           sg.Text('Shiny:'), sg.Checkbox('', key='shiny')],
           [sg.Text("Who's that Pokemon:"), sg.Checkbox('coming soon', key='who')],
-          [sg.Button('OK'), sg.Button('Save'), sg.Button('Cancel')],
+          [sg.Button('OK'), sg.Button('Save'), sg.Button('Cancel'), sg.Button('Previous'), sg.Button('Next')],
           [sg.Image(key="pokemon img"), sg.Text('', key='Pokemon not found')]]
 
-window = sg.Window('Pokemon', layout, size=(550, 650))
+window = sg.Window('Pokemon', layout, size=(550, 650), finalize=True)
+window['pokemon name'].bind('<Return>', '_Enter')
 
 while True:
     event, values = window.read()
     if event == sg.WIN_CLOSED or event == 'Cancel':
         break
-    if event == 'OK':
+    if event == 'OK' or event == 'pokemon name' + '_Enter':
         if os.path.exists('pokemon.png'):
             os.remove('pokemon.png')
         pokemon_func(values['pokemon name'], values['graphic'], values['shiny'], values['who'])
@@ -92,5 +92,16 @@ while True:
         pokemon = Image.open('pokemon.png')
         if file_path is not None:
             pokemon.save(file_path)
+
+    if event == 'Previous' and os.path.exists('pokemon.png'):
+        if values['pokemon name'].isdigit():
+            pokemon_func(str(int(values['pokemon name']) - 1), values['graphic'], values['shiny'], values['who'])
+            window['pokemon name'].update(str(int(values['pokemon name']) - 1))
+            window['pokemon img'].update(filename='pokemon.png')
+    if event == 'Next' and os.path.exists('pokemon.png'):
+        if values['pokemon name'].isdigit():
+            pokemon_func(str(int(values['pokemon name']) + 1), values['graphic'], values['shiny'], values['who'])
+            window['pokemon name'].update(str(int(values['pokemon name']) + 1))
+            window['pokemon img'].update(filename='pokemon.png')
 
 window.close()
