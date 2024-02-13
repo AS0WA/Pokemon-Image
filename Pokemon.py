@@ -119,7 +119,7 @@ while True:
 
     # Save
     if event == 'Save' and os.path.exists('pokemon.png'):
-        desktop = os.path.join('c:\\Users', os.getlogin(), f'Desktop\\{values["pokemon name"]}.png')
+        desktop = os.path.join('c:\\Users', os.getlogin(), f'Desktop\\{pokemon_data[0]}.png')
         file_path = sg.popup_get_file('Path', save_as=True, default_path=desktop, default_extension='.png')
         pokemon = Image.open('pokemon.png')
         if file_path is not None:
