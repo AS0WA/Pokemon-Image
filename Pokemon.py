@@ -22,7 +22,8 @@ def pokemon_func(pokemon_name, graphic, shiny, who):
 def pokemon_image_url(pokemon_name, graphic, shiny):
     try:
         pokeapi = requests.get(
-            f"https://pokeapi.co/api/v2/pokemon/{pokemon_name.lower() and pokemon_name.replace(' ', '-')}")
+            f"https://pokeapi.co/api/v2/pokemon/{pokemon_name.lower() and pokemon_name.replace(' ', '-')}"
+        )
         pokemon = pokeapi.json()
 
         if graphic == "Pixel Art" and shiny is True:
