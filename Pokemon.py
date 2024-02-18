@@ -54,15 +54,21 @@ def pokemon_image_url(pokemon_name):
 
 
 def pokemon_who(pokemon_identity):
-    new_data = []
+    black_and_white = []
+    transparent = []
     img = Image.open(f'pokemons/{pokemon_identity}.png').convert("RGBA")
     data = img.getdata()
     for item in data:
         if item[0] > 0 and item[1] > 0 and item[2] > 0:
-            new_data.append((0, 0, 0, 255))
+            black_and_white.append((0, 0, 0, 255))
         else:
-            new_data.append((255, 255, 255, 255))
-    img.putdata(new_data)
+            black_and_white.append((255, 255, 255, 255))
+    for item in black_and_white:
+        if item[:3] == (255, 255, 255):
+            transparent.append((255, 255, 255, 0))
+        else:
+            transparent.append(item)
+    img.putdata(transparent)
     if 'who' in pokemon_identity:
         img.save(f'pokemons/{pokemon_identity}.png', "PNG")
     else:
@@ -124,7 +130,7 @@ layout = [
         sg.Text("Shiny:"),
         sg.Checkbox("", key="shiny"),
     ],
-    [sg.Text("Who's that Pokemon:"), sg.Checkbox("coming soon", key="who")],
+    [sg.Text("Who's that Pokemon:"), sg.Checkbox("work in progress", key="who")],
     [
         sg.Button("Previous", disabled=True),
         sg.Text(key="pokemon data"),
