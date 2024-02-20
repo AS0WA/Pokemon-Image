@@ -88,7 +88,7 @@ def pokemon_find(pokemon_name):
     pokemons_list = [pokemon for pokemon in os.listdir('pokemons')]
     pokemon_identity = re.findall(pokemon_pattern, ' _-_'.join(pokemons_list))
 
-    # if Pokémon 'who' image not exist, but Pokémon image is exist make 'who' of it
+    # if Pokémon 'who' image not exist, but Pokémon images exist make 'who' of it
     if not pokemon_identity:
         if values['who']:
             pokemon_pattern = f'[^ ]* {values["graphic"]}'
@@ -153,7 +153,7 @@ while True:
         if not os.path.exists('pokemons'):
             os.makedirs('pokemons')
 
-        # Check Pokémon image is exist, if not create it
+        # Check Pokémon image exists, if not create it
         pokemon_data = pokemon_find(values['pokemon name'])
 
         # Correct data
@@ -187,6 +187,15 @@ while True:
     # Previous Next
     if event in ["Previous", "Next"] and os.path.exists(f'pokemons/{pokemon_data[1]}.png'):
         pokemon_id = pokemon_data[0][1] + (-1 if event == "Previous" else 1)
+
+        # If it is the first Pokémon, jump to the last Pokémon using the previous button
+        if pokemon_id == 0:
+            pokemon_id = 1025
+        # If it is the last Pokémon, jump to the first Pokémon using the previous button
+        elif pokemon_id == 1026:
+            pokemon_id = 1
+
+        # Make new pokemon_data
         pokemon_data = pokemon_find(str(pokemon_id))
 
         # Make new Pokémon.png
