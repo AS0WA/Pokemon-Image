@@ -5,42 +5,42 @@ import os
 import re
 
 
-def pokemon_func(pokemon_name):
-    pokemon = pokemon_image_url(pokemon_name)
+def pokemon_func(pokemon_name, graphic, shiny, who):
+    pokemon = pokemon_image_url(pokemon_name, graphic, shiny)
     # pokemon > return img, pokemon_data(name, ID)
 
     if pokemon is not None:
-        pokemon_identity = f'{pokemon[1][1]} {pokemon[1][0]} {values["graphic"]}'
-        pokemon_identity += " shiny" if values["shiny"] else ''
-        pokemon_identity += " who" if values["who"] else ''
+        pokemon_identity = f'{pokemon[1][1]} {pokemon[1][0]} {graphic}'
+        pokemon_identity += " shiny" if shiny else ''
+        pokemon_identity += " who" if who else ''
 
         pokemon[0].save(f'pokemons/{pokemon_identity}.png', "PNG")
         img = Image.open(f'pokemons/{pokemon_identity}.png')
         img = img.resize((500, 500))
         img.save(f'pokemons/{pokemon_identity}.png')
 
-        if values["who"]:
+        if who:
             pokemon_who(pokemon_identity)
 
         return pokemon[1], pokemon_identity
 
 
-def pokemon_image_url(pokemon_name):
+def pokemon_image_url(pokemon_name, graphic, shiny):
     try:
         pokeapi = requests.get(
             f"https://pokeapi.co/api/v2/pokemon/{pokemon_name.lower() and pokemon_name.replace(' ', '-')}"
         )
         pokemon = pokeapi.json()
 
-        if values["graphic"] == "Pixel Art" and values["shiny"] is True:
+        if graphic == "Pixel Art" and shiny is True:
             url = pokemon["sprites"]["front_shiny"]
-        elif values["graphic"] == "Art Work" and values["shiny"] is False:
+        elif graphic == "Art Work" and shiny is False:
             url = pokemon["sprites"]["other"]["official-artwork"]["front_default"]
-        elif values["graphic"] == "Art Work" and values["shiny"] is True:
+        elif graphic == "Art Work" and shiny is True:
             url = pokemon["sprites"]["other"]["official-artwork"]["front_shiny"]
-        elif values["graphic"] == "3D" and values["shiny"] is False:
+        elif graphic == "3D" and shiny is False:
             url = pokemon["sprites"]["other"]["home"]["front_default"]
-        elif values["graphic"] == "3D" and values["shiny"] is True:
+        elif graphic == "3D" and shiny is True:
             url = pokemon["sprites"]["other"]["home"]["front_shiny"]
         else:
             url = pokemon["sprites"]["front_default"]
@@ -75,11 +75,11 @@ def pokemon_who(pokemon_identity):
         img.save(f'pokemons/{pokemon_identity} who.png', "PNG")
 
 
-def pokemon_find(pokemon_name):
-    pokemon_pattern = f'[^ ]* {values["graphic"]}'
-    if values["shiny"]:
+def pokemon_find(pokemon_name, graphic, shiny, who):
+    pokemon_pattern = f'[^ ]* {graphic}'
+    if shiny:
         pokemon_pattern += ' shiny'
-    if values["who"]:
+    if who:
         pokemon_pattern += ' who'
     if pokemon_name.isdigit():
         pokemon_pattern = f'_-_{pokemon_name} {pokemon_pattern}.png'
@@ -87,12 +87,13 @@ def pokemon_find(pokemon_name):
         pokemon_pattern = f' {pokemon_name} {pokemon_pattern}.png'
     pokemons_list = [pokemon for pokemon in os.listdir('pokemons')]
     pokemon_identity = re.findall(pokemon_pattern, ' _-_'.join(pokemons_list))
+    # pokemon1pokemon2 > pokemon1_-_pokemon2
 
     # if Pokémon 'who' image not exist, but Pokémon images exist make 'who' of it
     if not pokemon_identity:
-        if values['who']:
-            pokemon_pattern = f'[^ ]* {values["graphic"]}'
-            if values["shiny"]:
+        if who:
+            pokemon_pattern = f'[^ ]* {graphic}'
+            if shiny:
                 pokemon_pattern += ' shiny'
             if pokemon_name.isdigit():
                 pokemon_pattern = f'_-_{pokemon_name} {pokemon_pattern}.png'
@@ -108,7 +109,7 @@ def pokemon_find(pokemon_name):
 
     if not pokemon_identity:
         # Make pokemon image, name and ID
-        pokemon_data = pokemon_func(pokemon_name)
+        pokemon_data = pokemon_func(pokemon_name, graphic, shiny, who)
         # pokemon_func > return (name, ID), pokemon_identity
 
     else:
@@ -133,14 +134,14 @@ layout = [
     [sg.Text("Who's that Pokemon:"), sg.Checkbox("work in progress", key="who")],
     [
         sg.Button("Previous", disabled=True),
-        sg.Text(key="pokemon data"),
-        sg.Button("Next", disabled=True),
+        sg.Push(), sg.Text(key="pokemon data"),
+        sg.Push(), sg.Button("Next", disabled=True),
     ],
-    [sg.Button("OK"), sg.Button("Save", disabled=True), sg.Button("Cancel")],
+    [sg.Button("OK"), sg.Button("Save", disabled=True), sg.Push(), sg.Button("Cancel")],
     [sg.Image(key="pokemon img"), sg.Text("", key="pokemon not found")],
 ]
 
-window = sg.Window("Pokemon", layout, size=(550, 650), finalize=True)
+window = sg.Window("Pokemon", layout, size=(500, 650), finalize=True)
 window["pokemon name"].bind("<Return>", "_Enter")
 
 while True:
@@ -154,7 +155,7 @@ while True:
             os.makedirs('pokemons')
 
         # Check Pokémon image exists, if not create it
-        pokemon_data = pokemon_find(values['pokemon name'])
+        pokemon_data = pokemon_find(values['pokemon name'], values['graphic'], values['shiny'], values['who'])
 
         # Correct data
         if os.path.exists(f'pokemons/{pokemon_data[1]}.png'):
@@ -196,7 +197,7 @@ while True:
             pokemon_id = 1
 
         # Make new pokemon_data
-        pokemon_data = pokemon_find(str(pokemon_id))
+        pokemon_data = pokemon_find(str(pokemon_id), values['graphic'], values['shiny'], values['who'])
 
         # Make new Pokémon.png
         if os.path.exists(f'pokemons/{pokemon_data[1]}.png'):
