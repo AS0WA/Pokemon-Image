@@ -126,6 +126,21 @@ def pokemon_find(pokemon_name, graphic, shiny, who):
 input_with = 20
 num_items_to_show = 5
 
+# Make pokemons directory
+if not os.path.exists('pokemons'):
+    os.makedirs('pokemons')
+
+# Make .pokemons.json in pokemons directory
+if not os.path.exists('pokemons/.pokemons.json'):
+    pokemons_dict = requests.get('https://pokeapi.co/api/v2/pokemon/?limit=99999')
+    pokemons_dict = pokemons_dict.json()
+    pokemons_list = []
+    with open('pokemons/.pokemons.json', 'x') as pokemons_json:
+        for pokemon in pokemons_dict['results']:
+            pokemon_id = re.findall('/[0-9]+/', pokemon['url'])
+            pokemons_list.append({'name': f'{pokemon['name']}', 'id': pokemon_id[0].replace('/', '')})
+        json.dump(pokemons_list, pokemons_json, indent=4)
+
 choices = []
 with open('pokemons/.pokemons.json', 'r') as pokemons_json:
     pokemons = json.load(pokemons_json)
@@ -204,25 +219,11 @@ while True:
         window['box container'].update(visible=False)
 
 #
-    # Make .pokemons.json in pokemons directory
-    if not os.path.exists('pokemons/.pokemons.json'):
-        pokemons_dict = requests.get('https://pokeapi.co/api/v2/pokemon/?limit=99999')
-        pokemons_dict = pokemons_dict.json()
-        pokemons_list = []
-        with open('pokemons/.pokemons.json', 'x') as pokemons_json:
-            for pokemon in pokemons_dict['results']:
-                pokemon_id = re.findall('/[0-9]+/', pokemon['url'])
-                pokemons_list.append({'name': f'{pokemon['name']}', 'id': pokemon_id[0].replace('/', '')})
-            json.dump(pokemons_list, pokemons_json, indent=4)
-
     with open('pokemons/.pokemons.json', 'r') as pokemons_json:
         pokemons_dict = json.load(pokemons_json)
 
         try:
             if event == "OK" or (event == "pokemon name" + "_Enter" and values['pokemon name'] == values['box'][0]):
-                # Make pokemons directory
-                if not os.path.exists('pokemons'):
-                    os.makedirs('pokemons')
 
                 # Check Pokémon exists in .pokemons.json
                 for pokemon_dict in pokemons_dict:
