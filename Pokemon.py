@@ -239,7 +239,6 @@ while True:
                 except NameError:
                     pokemon_data = [False, False]
 
-                print(pokemon_data)
                 # Correct data
                 if os.path.exists(f'pokemons/{pokemon_data[1][0]}.png'):
                     window['pokemon img'].update(filename=f'pokemons/{pokemon_data[1][0]}.png')
